@@ -51,6 +51,34 @@ Key runtime signals in payload:
 - `trust_threshold`, `trust_threshold_met`
 - `coverage`, `diversity`, `num_subclaims`
 
+## Claim Strictness and Evidence Logic Layer
+
+After trust computation and before final output reconciliation, worker now runs a strictness/override layer:
+
+- claim strictness profiling (assertiveness/universality/modality/falsifiability)
+- evidence strength scoring (hedging, rarity, uncertainty, stance strength)
+- contradiction-dominance override for strong diverse refutation
+- diversity-aware confidence caps
+- multi-hop/conditional relaxation to prefer `PARTIALLY_TRUE` over blanket `UNVERIFIABLE` when partial chain support exists
+
+Diagnostics added to verdict payload:
+
+- `strictness_profile`
+- `override_fired`
+- `override_reason`
+- `override_key_numbers`
+
+Key config env vars:
+
+- `STRICTNESS_HIGH_THRESHOLD`
+- `REFUTE_COVERAGE_FORCE_FALSE`
+- `REFUTE_DIVERSITY_FORCE_FALSE`
+- `HEDGE_PENALTY_BLOCK_TRUE`
+- `DIVERSITY_CONFIDENCE_CAP_LOW`
+- `DIVERSITY_CONFIDENCE_CAP_MID`
+- `NEGATION_ANCHOR_BOOST_WEIGHT`
+- `MULTIHOP_KG_HINT_MAX_BOOST`
+
 ## Verdict Generation
 
 `VerdictGenerator` is responsible for:
