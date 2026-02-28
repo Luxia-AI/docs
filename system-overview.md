@@ -1,67 +1,68 @@
-# System Overview
+﻿# System Overview
 
-Luxia is a multi-service claim verification system with realtime client interaction and evidence-driven verdict generation.
+Luxia is a multi-service hybrid corrective RAG fact verification system.
 
-## Services
+## Service Roles
 
-- `socket-hub`:
-  - Accepts client Socket.IO events
-  - Authenticates room access
-  - Forwards claims for processing
-  - Emits final worker results back to room subscribers
-- `dispatcher`:
-  - Accepts dispatch requests (`/dispatch/submit`)
-  - Calls worker verify endpoint
-  - Supports Kafka consume/publish flow when enabled
-  - Uses callback fallback for delivery failure scenarios
-- `worker`:
-  - Runs corrective retrieval pipeline
-  - Combines semantic and KG signals
-  - Applies trust gating and adaptive policy
-  - Generates verdict + rationale + evidence map
-- `shared`:
-  - Provides shared HTTP metrics middleware (`shared/metrics.py`)
-- `infra`:
-  - Local multi-container dev topology (`docker-compose.yml`)
-  - Azure unified container runtime (`infra/azure`)
-  - Observability stack configs (`infra/observability`)
-- `frontend`:
-  - Next.js user interface layer
+- `socket-hub`
+  - Socket.IO ingress (`join_room`, `post_message`)
+  - room authentication and token-scoped authorization checks
+  - stage/result fanout (`worker_stage`, `worker_update`)
+- `control-plane-api`
+  - room ownership, role-based action authorization, room-secret verification
+- `dispatcher`
+  - request orchestration (`POST /dispatch/submit`)
+  - worker timeout control, Kafka consume/publish path, callback fallback
+- `worker`
+  - retrieval/ranking/trust/verdict pipeline (`POST /worker/verify`)
+  - stage callback emission to socket-hub
+- `frontend`
+  - realtime contract consumer for stage progression and final verdict output
 
-## High-Level Topology
+## Topology
 
 ```mermaid
 flowchart LR
   Client -->|Socket.IO| SH[socket-hub]
-  SH -->|HTTP dispatch| DP[dispatcher]
-  DP -->|HTTP verify| WK[worker]
+  SH -->|HTTP /dispatch/submit| DP[dispatcher]
+  DP -->|HTTP /worker/verify| WK[worker]
+  WK -->|stage callback| SH
   WK -->|result payload| DP
-  DP -->|result / callback| SH
-  SH -->|worker_update| Client
+  DP -->|result or callback| SH
+  SH -->|worker_update / worker_stage| Client
 
+  SH <--> CP[control-plane-api]
+  SH <--> REDIS[(Redis)]
   SH <--> K[(Kafka)]
   DP <--> K
-  SH <--> R[(Redis)]
-  WK <--> R
   WK <--> P[(Pinecone)]
   WK <--> N[(Neo4j)]
+  WK <--> FTS[(SQLite FTS5)]
 ```
 
-## Runtime Characteristics
+### Prose Equivalent
 
-- FastAPI-based service APIs
-- Socket.IO ASGI app in `socket-hub`
-- Optional Kafka-based asynchronous fanout
-- Redis-backed room/auth state
-- Worker pipeline supports cache-first behavior and fallback response mode
-- Prometheus metrics exposed by each backend service
+1. Client connects to socket-hub and joins a room after control-plane authorization.
+2. Posted claims are dispatched to worker through dispatcher (or Kafka path).
+3. Worker runs corrective pipeline and emits stage callbacks during execution.
+4. Dispatcher/socket-hub return final payload and socket-hub broadcasts stage/result events.
 
-## Key Entry Points
+## Verification Pipeline Characteristics
 
-- `socket-hub/app/main.py`
-- `dispatcher/app/main.py`
-- `worker/app/main.py`
-- `shared/metrics.py`
-- `docker-compose.yml`
+- Retrieval-first cache gate before web expansion.
+- Hybrid evidence retrieval: vector + graph + lexical.
+- Adaptive trust sufficiency controls loop continuation.
+- Incremental one-query-at-a-time corrective search.
+- Deterministic verdict reconciliation and policy override layers.
 
-Last verified against code: February 13, 2026
+## Key Contracts
+
+- Socket ingress events: `join_room`, `post_message`
+- Socket egress events: `worker_stage`, `worker_update`
+- Dispatcher API: `POST /dispatch/submit`
+- Worker API: `POST /worker/verify`
+- Internal callbacks: `/internal/dispatch-stage`, `/internal/dispatch-result`
+
+For full implementation detail, see [methodology/README.md](./methodology/README.md).
+
+Last verified against code: February 28, 2026

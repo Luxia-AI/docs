@@ -1,119 +1,82 @@
-# Worker Pipeline Deep Dive
+﻿# Worker Pipeline
 
-`worker` exposes `POST /worker/verify` and returns a normalized verification payload.
+`worker` exposes `POST /worker/verify` and wraps the hybrid corrective RAG verification pipeline.
 
-## Execution Layers
+## API Contract
 
-1. API layer (`worker/app/main.py`)
-2. Pipeline orchestration (`worker/app/services/corrective/pipeline/__init__.py`)
-3. Retrieval and ranking stack
-4. Verdict generation (`worker/app/services/verdict/verdict_generator.py`)
+Request (`VerifyRequest`):
 
-## Request and Response Core
+- `job_id: str`
+- `claim: str`
+- `room_id: str | null`
+- `client_id: str | null`
+- `client_claim_id: str | null`
+- `source: str | null`
+- `domain: str` (default `general`)
+- `top_k: int` (default `5`, range `1..20`)
 
-Request model (`VerifyRequest`) includes:
+Response: normalized completion payload with verdict, trust/ranking signals, evidence summaries, and optional `stage_events`.
 
-- `job_id`, `claim`, optional `room_id`, `source`
-- `domain` (default `general`)
-- `top_k` (default 5, range 1..20)
+## Execution Flow
 
-Response includes:
+```mermaid
+flowchart TD
+  A[worker /worker/verify] --> B[CorrectivePipeline.run]
+  B --> C[Claim entities + anchors]
+  C --> D[Retrieve VDB + KG + lexical]
+  D --> E[Hybrid rank + adaptive trust]
+  E --> F{Sufficient and cache-safe?}
+  F -->|yes| G[Verdict from cache evidence]
+  F -->|no| H[Incremental search/scrape/extract/ingest loop]
+  H --> E
+  G --> I[Final payload format]
+  H --> J[Verdict from final evidence]
+  J --> I
+  I --> K[worker_update delivery path]
+```
 
-- final verdict fields
-- ranking and trust metrics
-- evidence and evidence_map summaries
-- pipeline/data-source metadata
+### Prose Equivalent
 
-## Corrective Pipeline Behavior
+1. Worker loads pipeline singleton and starts stage callback capture.
+2. Pipeline runs retrieval-first trust gate.
+3. If cache evidence is sufficient and passes deterministic checks, worker completes without web expansion.
+4. Otherwise the pipeline enters one-query corrective loop with immediate ingest and rerank after each query.
+5. Final verdict synthesis runs with deterministic reconciliation and override layers.
+6. Worker returns normalized payload and stage history.
 
-Implemented orchestration emphasizes quota efficiency:
+## Stage Events Emitted by Worker
 
-- retrieval-first from available stores
-- trust evaluation before expensive web search expansion
-- incremental search/query processing when confidence is insufficient
-- early stop when threshold criteria are met
+- `started`
+- `retrieval_done`
+- `ranking_done`
+- `search_done`
+- `extraction_done`
+- `ingestion_done`
+- `completed`
+- `error`
 
-Primary collaborators:
+Stage callbacks are posted to `socket-hub /internal/dispatch-stage` when configured.
 
-- extraction: facts, entities, relations
-- stores: Pinecone (VDB), Neo4j (KG)
-- retrieval: semantic + structural
-- ranking: hybrid scoring and trust policy
+## Worker Resilience Behavior
 
-## Trust and Ranking
+- Pipeline initialization is lazy and optionally preloaded on startup.
+- If pipeline execution raises, worker returns a fallback-completed payload to keep API availability.
+- Fallback payload still includes claim/job metadata and conservative verdict fields.
 
-Key runtime signals in payload:
+## Key Runtime Signals in Response
 
-- `top_ranking_score`, `avg_ranking_score`
-- `vdb_signal_count`, `kg_signal_count`
-- `vdb_signal_sum_top5`, `kg_signal_sum_top5`
-- `trust_policy_mode`, `trust_metric_name`, `trust_metric_value`
-- `trust_threshold`, `trust_threshold_met`
-- `coverage`, `diversity`, `num_subclaims`
+- Ranking: `top_ranking_score`, `avg_ranking_score`
+- Retrieval composition: `vdb_signal_count`, `kg_signal_count`, top5 signal sums
+- Trust: `trust_policy_mode`, `trust_metric_name`, `trust_metric_value`, `trust_threshold_met`
+- Adaptive metrics: `coverage`, `diversity`, `num_subclaims`
+- Provenance: `used_web_search`, `data_source`, `llm` metadata
 
-## Claim Strictness and Evidence Logic Layer
+## Where to Go Deeper
 
-After trust computation and before final output reconciliation, worker now runs a strictness/override layer:
+- Architecture: [methodology/01-system-architecture.md](./methodology/01-system-architecture.md)
+- Stage internals: [methodology/02-pipeline-stage-decomposition.md](./methodology/02-pipeline-stage-decomposition.md)
+- Retrieval/ingestion: [methodology/03-retrieval-and-ingestion.md](./methodology/03-retrieval-and-ingestion.md)
+- Ranking/trust loop: [methodology/04-ranking-trust-and-corrective-loop.md](./methodology/04-ranking-trust-and-corrective-loop.md)
+- Verdict synthesis: [methodology/05-verdict-synthesis.md](./methodology/05-verdict-synthesis.md)
 
-- claim strictness profiling (assertiveness/universality/modality/falsifiability)
-- evidence strength scoring (hedging, rarity, uncertainty, stance strength)
-- contradiction-dominance override for strong diverse refutation
-- diversity-aware confidence caps
-- multi-hop/conditional relaxation to prefer `PARTIALLY_TRUE` over blanket `UNVERIFIABLE` when partial chain support exists
-
-Diagnostics added to verdict payload:
-
-- `strictness_profile`
-- `override_fired`
-- `override_reason`
-- `override_key_numbers`
-
-Key config env vars:
-
-- `STRICTNESS_HIGH_THRESHOLD`
-- `REFUTE_COVERAGE_FORCE_FALSE`
-- `REFUTE_DIVERSITY_FORCE_FALSE`
-- `PREDICATE_MATCH_THRESHOLD`
-- `ANCHOR_THRESHOLD`
-- `CONTRADICTION_THRESHOLD`
-- `CONTRADICT_RATIO_FOR_FORCE_FALSE`
-- `CONTRADICT_RATIO_FORCE_FALSE`
-- `DIVERSITY_FORCE_FALSE`
-- `UNVERIFIABLE_CONFIDENCE_CAP`
-- `HEDGE_PENALTY_BLOCK_TRUE`
-- `DIVERSITY_CONFIDENCE_CAP_LOW`
-- `DIVERSITY_CONFIDENCE_CAP_MID`
-- `NEGATION_ANCHOR_BOOST_WEIGHT`
-- `MULTIHOP_KG_HINT_MAX_BOOST`
-
-## Verdict Generation
-
-`VerdictGenerator` is responsible for:
-
-- verdict classes: `TRUE`, `FALSE`, `PARTIALLY_TRUE`, `UNVERIFIABLE`
-- rationale and key findings
-- claim breakdown and evidence map
-- truthfulness percentage and confidence calibration
-
-The generator includes safeguards for:
-
-- insufficient evidence handling
-- contradiction detection and stance-aware aggregation
-- comparative/numeric claim edge handling paths
-
-## Fallback Mode
-
-If pipeline execution fails at runtime:
-
-- worker returns fallback-completed payload
-- mock verdict logic is applied from claim text patterns
-- service availability is preserved
-
-## Key Files
-
-- `worker/app/main.py`
-- `worker/app/services/corrective/pipeline/__init__.py`
-- `worker/app/services/ranking/hybrid_ranker.py`
-- `worker/app/services/verdict/verdict_generator.py`
-
-Last verified against code: February 13, 2026
+Last verified against code: February 28, 2026
