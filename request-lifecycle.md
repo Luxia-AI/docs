@@ -92,4 +92,5 @@ When enabled:
 
 For detailed internals, see [methodology/02-pipeline-stage-decomposition.md](./methodology/02-pipeline-stage-decomposition.md).
 
-Last verified against code: February 28, 2026
+Last verified against code: March 2, 2026
+

@@ -59,4 +59,5 @@ Each major methodology file includes Mermaid diagrams plus prose equivalents. Di
 - Existing docs under `docs/` are treated as non-authoritative unless revalidated against code.
 - Terminology baseline: `hybrid corrective RAG fact verification pipeline`.
 
-Last verified against code: February 28, 2026
+Last verified against code: March 2, 2026
+

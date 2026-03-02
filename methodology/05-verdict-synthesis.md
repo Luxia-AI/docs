@@ -212,4 +212,5 @@ flowchart TD
 6. Failure points and trade-offs
 - Availability is protected, but epistemic fidelity is reduced in fallback mode.
 
-Last verified against code: February 28, 2026
+Last verified against code: March 2, 2026
+

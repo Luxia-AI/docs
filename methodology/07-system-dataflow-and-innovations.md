@@ -112,4 +112,5 @@ flowchart TD
 7. Per-job LLM quota hardening with reserved critical slots and degradable non-critical calls.
 8. Native stage-stream observability (`worker_stage`) integrated with final result transport (`worker_update`).
 
-Last verified against code: February 28, 2026
+Last verified against code: March 2, 2026
+

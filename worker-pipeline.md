@@ -12,7 +12,7 @@ Request (`VerifyRequest`):
 - `client_id: str | null`
 - `client_claim_id: str | null`
 - `source: str | null`
-- `domain: str` (default `general`)
+- `domain: str` (default `health`)
 - `top_k: int` (default `5`, range `1..20`)
 
 Response: normalized completion payload with verdict, trust/ranking signals, evidence summaries, and optional `stage_events`.
@@ -65,11 +65,13 @@ Stage callbacks are posted to `socket-hub /internal/dispatch-stage` when configu
 
 ## Key Runtime Signals in Response
 
+- Verdict layer: `verdict`, `display_verdict`, `verdict_band`, `verdict_confidence`, `calibrated_confidence`, `truthfulness_percent`
 - Ranking: `top_ranking_score`, `avg_ranking_score`
 - Retrieval composition: `vdb_signal_count`, `kg_signal_count`, top5 signal sums
 - Trust: `trust_policy_mode`, `trust_metric_name`, `trust_metric_value`, `trust_threshold_met`
 - Adaptive metrics: `coverage`, `diversity`, `num_subclaims`
-- Provenance: `used_web_search`, `data_source`, `llm` metadata
+- Diagnostics: `pipeline_diagnostics_v2`, `trust_snapshot_v2`, `llm`, `stage_events`
+- Provenance: `used_web_search`, `data_source`
 
 ## Where to Go Deeper
 
@@ -79,4 +81,4 @@ Stage callbacks are posted to `socket-hub /internal/dispatch-stage` when configu
 - Ranking/trust loop: [methodology/04-ranking-trust-and-corrective-loop.md](./methodology/04-ranking-trust-and-corrective-loop.md)
 - Verdict synthesis: [methodology/05-verdict-synthesis.md](./methodology/05-verdict-synthesis.md)
 
-Last verified against code: February 28, 2026
+Last verified against code: March 2, 2026

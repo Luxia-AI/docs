@@ -65,4 +65,5 @@ flowchart LR
 
 For full implementation detail, see [methodology/README.md](./methodology/README.md).
 
-Last verified against code: February 28, 2026
+Last verified against code: March 2, 2026
+

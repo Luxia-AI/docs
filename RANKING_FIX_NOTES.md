@@ -1,5 +1,7 @@
 # Ranking Fix Notes
 
+Supplemental note: this file captures a targeted ranking remediation slice. For current end-to-end methodology context, use `docs/methodology/README.md` first.
+
 Changes to `worker/app/services/ranking/hybrid_ranker.py` to fix 15 failing
 tests across `test_hybrid_rank.py` (9 failures) and
 `test_ranking_grading_integration.py` (6 failures).

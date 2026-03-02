@@ -216,4 +216,5 @@ flowchart LR
 4. Policy tuning pressure
 - Strictness and confidence caps can over-correct in edge domains.
 
-Last verified against code: February 28, 2026
+Last verified against code: March 2, 2026
+

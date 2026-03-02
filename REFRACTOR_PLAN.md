@@ -1,5 +1,7 @@
 # Health-Only Hybrid RAG Refactor Plan (Deterministic Polarity + Calibration v2)
 
+Supplemental plan note: this file is a focused refactor proposal. For the current implemented methodology and contracts, use `docs/methodology/README.md` and linked sections.
+
 ## 1. Problem Summary
 - Polarity collapse toward TRUE-like outputs reduced FALSE and UNVERIFIABLE recall.
 - Contradiction evidence admission was too sparse in decisive paths.

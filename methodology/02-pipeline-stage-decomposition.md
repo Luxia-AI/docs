@@ -237,4 +237,5 @@ sequenceDiagram
 6. Failure points and trade-offs
 - Verdict quality is bounded by final evidence set and admissibility filtering quality.
 
-Last verified against code: February 28, 2026
+Last verified against code: March 2, 2026
+

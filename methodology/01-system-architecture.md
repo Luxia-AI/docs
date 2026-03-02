@@ -183,4 +183,5 @@ flowchart LR
 - Rationale: corrective loops are non-trivial; stage visibility is necessary for operations and UX.
 - Trade-off: event schema stability becomes part of backward compatibility surface.
 
-Last verified against code: February 28, 2026
+Last verified against code: March 2, 2026
+

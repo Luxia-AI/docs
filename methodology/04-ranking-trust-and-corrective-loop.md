@@ -210,4 +210,5 @@ flowchart TD
 3. URL memory against both global (VDB) and local (job) state
 - Rationale: avoids duplicate scrape cost in long loops and across prior runs.
 
-Last verified against code: February 28, 2026
+Last verified against code: March 2, 2026
+

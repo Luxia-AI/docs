@@ -46,4 +46,5 @@ The full implementation-level methodology is split for research-grade readabilit
 - Existing docs are treated as implementation references only when validated against source code.
 - No runtime contracts are changed by this docs refresh.
 
-Last verified against code: February 28, 2026
+Last verified against code: March 2, 2026
+

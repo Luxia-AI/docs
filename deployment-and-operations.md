@@ -1,52 +1,123 @@
-# Deployment and Operations
+﻿# Deployment and Operations
 
-## Local Compose Topology
+This document captures the current runtime topology and operational controls for Luxia.
 
-Primary runtime is defined in `docker-compose.yml` and includes:
+## Deployment Profiles
 
-- core services: `socket-hub`, `dispatcher`, `worker`
-- messaging/state: `kafka`, `zookeeper`, `redis`
-- observability: `prometheus`, `alertmanager`, `loki`, `promtail`, `tempo`, `otel-collector`, `grafana`
+### 1) Local multi-container runtime (`docker-compose.yml`)
 
-## Azure Unified Container Mode
+Core application services:
 
-`infra/azure` packages all backend services into one container:
+- `socket-hub`
+- `dispatcher`
+- `worker`
+- `control-plane-api`
 
-- Nginx ingress on port 80
-- Supervisord manages:
-  - `socket-hub` (uvicorn on 127.0.0.1:8000)
-  - `dispatcher` (uvicorn on 127.0.0.1:8001)
-  - `worker` (uvicorn on 127.0.0.1:8002)
-- Nginx route prefixes:
-  - `/` -> socket-hub
-  - `/dispatcher/` -> dispatcher
-  - `/worker/` -> worker
-  - `/metrics/{service}` -> service metrics
+State and transport services:
 
-## Observability
+- `redis`
+- `kafka`
+- `zookeeper`
+- `control-plane-db` (PostgreSQL container)
 
-Shared metrics middleware is installed by all services through `shared/metrics.py`.
+Observability stack:
 
-Backend metrics endpoints:
+- `prometheus`
+- `alertmanager`
+- `loki`
+- `promtail`
+- `tempo`
+- `otel-collector`
+- `grafana`
 
-- socket-hub: `GET /metrics`
-- dispatcher: `GET /metrics`
-- worker: `GET /metrics`
+### 2) Azure unified-container runtime (`infra/azure`)
 
-Tracing is configured for OTLP export; stack includes Tempo and OTel Collector in compose.
+Entry and process model:
 
-## Runtime Controls
+- bootstrap script: `infra/azure/start.sh`
+- process supervisor: `infra/azure/supervisord/supervisord.conf`
+- reverse proxy: `infra/azure/nginx/nginx.conf`
 
-- High timeout defaults are configured for long-running verification workloads.
-- Kafka reliability knobs include retries/backoff/request timeout.
-- Worker preload behavior is controlled by `WORKER_PRELOAD_PIPELINE`.
+Internal process ports (127.0.0.1):
 
-## Infra Status Notes
+- socket-hub: `8000`
+- dispatcher: `8001`
+- worker: `8002`
+- control-plane-api: `8003`
 
-- `infra/k8s/backend-deployment.yml`: currently empty
-- `infra/k8s/frontend-deployment.yml`: currently empty
-- `infra/terraform/main.tf`: currently empty
+Nginx routing:
 
-These are placeholders and not authoritative deployment sources at this time.
+- `/` -> `socket-hub`
+- `/dispatcher/` -> `dispatcher`
+- `/worker/` -> `worker`
+- `/v1/` -> `control-plane-api`
+- `/metrics/socket-hub` -> socket metrics
+- `/metrics/dispatcher` -> dispatcher metrics
+- `/metrics/worker` -> worker metrics
 
-Last verified against code: February 13, 2026
+## Runtime Characteristics
+
+- Backend services are FastAPI applications.
+- `socket-hub` runs as Socket.IO ASGI app.
+- Service metrics are exposed via `shared/metrics.py` middleware on `/metrics`.
+- Worker runtime supports startup preload (`WORKER_PRELOAD_PIPELINE`) and fallback-completed behavior.
+- Kafka path is optional and controlled by service-level environment toggles.
+
+## Operational Controls
+
+### Timeout controls
+
+- Socket-hub dispatch envelope: `DISPATCH_CONNECT_TIMEOUT_SECONDS`, `DISPATCH_READ_TIMEOUT_SECONDS`, `DISPATCH_WRITE_TIMEOUT_SECONDS`, `DISPATCH_POOL_TIMEOUT_SECONDS`
+- Dispatcher->worker envelope: `WORKER_CONNECT_TIMEOUT_SECONDS`, `WORKER_READ_TIMEOUT_SECONDS`, `WORKER_WRITE_TIMEOUT_SECONDS`, `WORKER_POOL_TIMEOUT_SECONDS`
+
+### Transport mode controls
+
+- Socket-hub: `SOCKETHUB_USE_REDIS`, `SOCKETHUB_USE_KAFKA`, `SOCKETHUB_USE_KAFKA_RESULTS`
+- Dispatcher: `ENABLE_KAFKA`
+- Callback hardening: `SOCKETHUB_RESULT_CALLBACK_TOKEN`
+
+### Verification behavior controls
+
+- Confidence mode: `LUXIA_CONFIDENCE_MODE`
+- LLM budget: `GROQ_MAX_CALLS_PER_JOB`, related reserve settings
+- Verdict v2 toggles: `VERDICT_ENGINE_V2_ENABLED`, `VERDICT_ENGINE_V2_SHADOW`, `VERDICT_ENGINE_V2_FAIL_OPEN`
+
+## Observability and Telemetry
+
+Data planes:
+
+- Metrics: Prometheus scrape endpoints and service counters/histograms
+- Logs: Loki + Promtail
+- Traces: OTel collector -> Tempo
+- Dashboards: Grafana provisioning under `infra/observability/grafana`
+
+Important service-level metrics families:
+
+- socket-hub connection/auth/dispatch counters and latency
+- dispatcher dispatch counters and worker roundtrip latency
+- worker completion/failure counters and pipeline diagnostics fields in payload
+
+## Operational Risks and Notes
+
+1. Multi-path result delivery
+- HTTP callback and Kafka result paths coexist; this improves resilience but complicates failure forensics.
+
+2. Timeout sensitivity
+- Corrective verification can be long-running; under-provisioned timeouts appear as false `error` states.
+
+3. Infra placeholders
+- `infra/k8s/backend-deployment.yml`
+- `infra/k8s/frontend-deployment.yml`
+- `infra/terraform/main.tf`
+
+These files currently remain placeholders and are not authoritative deployment definitions.
+
+## Canonical Runtime Files
+
+- `docker-compose.yml`
+- `infra/azure/start.sh`
+- `infra/azure/supervisord/supervisord.conf`
+- `infra/azure/nginx/nginx.conf`
+- `infra/observability/**`
+
+Last verified against code: March 2, 2026
