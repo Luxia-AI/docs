@@ -30,6 +30,7 @@ Primary implementation sources:
 5. [05-verdict-synthesis.md](./05-verdict-synthesis.md)
 6. [06-failure-modes-and-tradeoffs.md](./06-failure-modes-and-tradeoffs.md)
 7. [07-system-dataflow-and-innovations.md](./07-system-dataflow-and-innovations.md)
+8. [figures/README.md](./figures/README.md)
 
 ## Section Schema Used Across Components
 
@@ -52,6 +53,8 @@ Each component section uses the same six-part schema:
 ## Diagram Policy
 
 Each major methodology file includes Mermaid diagrams plus prose equivalents. Diagrams are explanatory overlays; prose is complete and authoritative on its own.
+
+The `figures/` subdirectory provides a publication-ready figure pack (F01-F56) with dual Mermaid plus camera-ready figure specifications.
 
 ## Boundary Conditions
 
