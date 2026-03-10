@@ -54,7 +54,7 @@ flowchart TD
 - **How to Read**: Start from the leftmost/topmost stage, follow directed transitions, then interpret terminal nodes against the metrics listed in the data-source field.
 - **Expected Insight**: Reveals causal or procedural structure needed to reproduce and audit methodological behavior.
 - **Failure Signal to Watch**: Disagreement between directional outputs and supporting upstream evidence signals; review `alignment_score`, `neutral_only_stance_rate`, and policy path branches.
-- **Data Source / Log Fields**: policy_trace deterministic_binary_projection
+- **Data Source / Log Fields**: policy_trace step=`deterministic_evidence_owner`, `binary_collapse_reason`
 - **Export Notes**: SVG/PDF export preferred; grayscale-safe palette required; annotate as 1-column in final manuscript; keep text >= 8pt at print scale.
 
 ---
@@ -66,7 +66,7 @@ flowchart TD
 - **Placement**: Main
 - **Column Fit**: 1-column
 - **Research Question**: Which policy path branches dominate outcomes?
-- **Key Variables**: policy_trace.step, binary_fallback_reason, abstain_reason
+- **Key Variables**: policy_trace.step, binary_collapse_reason, abstain_reason
 
 #### Mermaid Block
 ```mermaid

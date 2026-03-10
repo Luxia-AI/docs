@@ -121,6 +121,7 @@ flowchart LR
 
 2. Technical mechanism
 - FastAPI endpoint `POST /worker/verify` accepts claim payload and optional domain/top_k controls.
+- Runtime enforces health-only domain scope; non-health domain requests are coerced to health mode.
 - Lazy singleton initialization of `CorrectivePipeline` with startup preload option.
 - Captures stage events and forwards to socket-hub callback endpoint.
 - Converts internal pipeline output into normalized external result schema.
@@ -183,5 +184,5 @@ flowchart LR
 - Rationale: corrective loops are non-trivial; stage visibility is necessary for operations and UX.
 - Trade-off: event schema stability becomes part of backward compatibility surface.
 
-Last verified against code: March 2, 2026
+Last verified against code: March 10, 2026
 

@@ -29,7 +29,7 @@ flowchart TD
 3. Retrieval produces multi-source candidates which ranking condenses into top evidence.
 4. Adaptive trust snapshot decides whether cached evidence is enough.
 5. If not enough, corrective loop enriches evidence memory and re-enters retrieval/ranking.
-6. Verdict synthesis reconciles structured statuses into final output payload.
+6. Verdict synthesis uses deterministic evidence-owner mass aggregation and fixed binary mapping in final payload.
 7. Result and stage streams are emitted to clients via socket-hub.
 
 ## Component: Evidence State Transition Controller
@@ -82,14 +82,14 @@ flowchart TD
 2. `socket-hub` validates room secret and action authorization through control-plane endpoints.
 3. `socket-hub` emits immediate `processing` update and forwards job via dispatcher or Kafka.
 4. `dispatcher` calls `POST /worker/verify` with normalized payload and timeout policy.
-5. Worker pipeline emits `started`, extracts claim entities/anchors, infers topics, and builds retrieval queries.
+5. Worker pipeline emits `started`, enforces health-only runtime scope, extracts claim entities/anchors, infers topics, and builds retrieval queries.
 6. Retrieval phase queries Pinecone, Neo4j, and lexical FTS branch; candidates are filtered and deduplicated.
 7. Ranking phase computes hybrid scores, applies admissibility and contradiction logic, and produces top evidence.
 8. Trust module computes adaptive sufficiency (`coverage`, `diversity`, `agreement`, `trust_post`).
 9. If cache path passes, verdict is generated immediately and pipeline returns `completed_from_cache`.
 10. If not sufficient, corrective loop runs per query: search -> scrape -> extract facts/entities/triples -> ingest -> re-retrieve -> re-rank -> re-check trust.
 11. Loop exits on sufficiency, confidence/comparative stop rules, or budget limits.
-12. Verdict generator performs LLM synthesis plus deterministic reconciliation, strictness overrides, and confidence calibration.
+12. Verdict generator performs LLM synthesis, evidence admission + deterministic mass policy, confidence calibration, and fixed binary collapse (`UNVERIFIABLE -> FALSE`).
 13. Worker returns normalized final payload including verdict, evidence map, trust/ranking diagnostics, and stage events.
 14. Dispatcher/socket-hub deliver result to room as `worker_update`; stage stream remains available as `worker_stage`.
 
@@ -97,7 +97,7 @@ flowchart TD
 
 1. Single-stage RAG usually performs one retrieve->generate pass; this system is iterative and trust-gated.
 2. Single-stage RAG often relies on one retrieval modality; this system merges semantic vectors, KG structure, and lexical signals.
-3. Single-stage RAG typically treats generation output as primary; this system adds deterministic reconciliation and policy override layers after generation.
+3. Single-stage RAG typically treats generation output as primary; this system normalizes LLM output into evidence admission and a deterministic evidence-owner policy.
 4. Single-stage RAG often lacks realtime intermediate visibility; this system streams stage-level lifecycle events.
 5. Single-stage RAG typically has static stop behavior; this system uses adaptive sufficiency, confidence-mode controls, and claim-type-specific early-stop logic.
 
@@ -108,9 +108,9 @@ flowchart TD
 3. Adaptive trust policy combining subclaim coverage, diversity, agreement, and strong/contradicted segment counts.
 4. Deterministic cache fast-path gate that validates segment resolution before allowing zero-search completion.
 5. Domain-trust-gated ingestion pipeline that prevents untrusted evidence from contaminating persistent retrieval stores.
-6. Multi-layer verdict governance: LLM synthesis, deterministic reconcile (v1/v2), numeric overrides, strictness/evidence-strength overrides, and binary enforcement.
+6. Single-owner verdict governance: LLM synthesis for structure, deterministic mass policy for final semantics, fixed binary projection, and invariant checks.
 7. Per-job LLM quota hardening with reserved critical slots and degradable non-critical calls.
 8. Native stage-stream observability (`worker_stage`) integrated with final result transport (`worker_update`).
 
-Last verified against code: March 2, 2026
+Last verified against code: March 10, 2026
 

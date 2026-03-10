@@ -164,11 +164,13 @@ flowchart LR
 - Produces final deterministic output despite noisy generative and retrieval inputs.
 
 2. Technical mechanism
-- Reconciliation engines, numeric overrides, strictness/evidence-strength overrides, confidence caps, rationale fidelity checks.
+- Evidence admission + deterministic mass aggregation (`support_mass`, `contradict_mass`, `neutral_mass`) own final semantics.
+- Fixed binary projection maps `UNVERIFIABLE` to `FALSE` after internal decision is finalized.
+- Invariant checks detect verdict-field mismatches and directional-label-to-mass inconsistencies.
 
 3. Inputs and outputs
 - Inputs: claim breakdown, evidence map, trust diagnostics.
-- Outputs: final verdict payload and override diagnostics.
+- Outputs: final verdict payload with internal/binary verdicts, abstain reason, policy trace, and admission diagnostics.
 
 4. Interaction with other components
 - Consumes final ranked evidence and adaptive metrics from pipeline.
@@ -177,7 +179,7 @@ flowchart LR
 - Converts probabilistic outputs into contract-stable decisions with explicit policy safeguards.
 
 6. Failure points and design trade-offs
-- Policy override complexity improves safety but raises regression risk without dedicated tests.
+- Overly strict admission gating can collapse directional masses; invariant diagnostics are required for early detection.
 
 ## Component: Fallback Availability Strategy
 
@@ -216,5 +218,5 @@ flowchart LR
 4. Policy tuning pressure
 - Strictness and confidence caps can over-correct in edge domains.
 
-Last verified against code: March 2, 2026
+Last verified against code: March 10, 2026
 

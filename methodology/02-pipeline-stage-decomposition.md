@@ -17,7 +17,7 @@ sequenceDiagram
 
     W->>P: run(post_text, domain, top_k, stage_callback)
     P-->>W: stage=started
-    P->>P: claim entities + must-have aliases
+    P->>P: claim entities + canonicalization + dual-track queries
     P->>R: retrieve_candidates(VDB + KG + BM25)
     P-->>W: stage=retrieval_done
     P->>R: rank_candidates + adaptive trust
@@ -46,7 +46,7 @@ sequenceDiagram
 ### Prose Equivalent
 
 1. Pipeline starts and emits `started` with claim preview.
-2. It extracts claim anchors/entities, infers topics, and retrieves cached evidence from VDB/KG/lexical index.
+2. It extracts claim anchors/entities, canonical claim segments, dual-track queries (original + canonical), infers topics, and retrieves cached evidence from VDB/KG/lexical index.
 3. It ranks evidence and computes adaptive trust.
 4. If trust is sufficient and cache precheck confirms resolved required segments, it completes without web expansion.
 5. Otherwise it enters incremental one-query loop: search, scrape, extract, ingest, re-retrieve, re-rank, trust re-check.
@@ -75,18 +75,19 @@ sequenceDiagram
 6. Failure points and trade-offs
 - Callback failures are logged but do not stop verification, so observability can degrade while core logic still runs.
 
-## Component: Claim Entity and Anchor Initialization
+## Component: Claim Entity, Canonicalization, and Anchor Initialization
 
 1. Functional role
 - Establishes retrieval anchors that constrain downstream candidate relevance.
 
 2. Technical mechanism
 - Claim entity extraction uses LLM-assisted path plus deterministic phrase fallback.
+- Canonicalizer produces structured segment fields (`subject`, `predicate`, `object`, `polarity`, `quantifier`, `predicate_family`) with drift-guard checks.
 - Must-have entity selection prioritizes high-salience entities and builds alias list for strict matching.
 
 3. Inputs and outputs
 - Inputs: raw claim text.
-- Outputs: `claim_entities`, `must_have_entities`, `must_have_aliases`.
+- Outputs: `claim_entities`, canonical claim payload, `must_have_entities`, `must_have_aliases`, and query facets.
 
 4. Interaction with other components
 - Feeds retrieval anchor filters, ranking must-have gates, and extraction admissibility checks.
@@ -237,5 +238,5 @@ sequenceDiagram
 6. Failure points and trade-offs
 - Verdict quality is bounded by final evidence set and admissibility filtering quality.
 
-Last verified against code: March 2, 2026
+Last verified against code: March 10, 2026
 

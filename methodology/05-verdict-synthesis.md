@@ -7,25 +7,22 @@ flowchart TD
     IN[Ranked evidence + adaptive metrics] --> PRE[Segment preparation + evidence normalization]
     PRE --> LLM[LLM verdict JSON generation]
     LLM --> PARSE[Parse + normalize evidence_map and claim_breakdown]
-    PARSE --> REC1[v1 reconciliation]
-    PARSE --> REC2[v2 reconcile/shadow]
-    REC1 --> NUM[Numeric/comparative override checks]
-    REC2 --> NUM
-    NUM --> CAL[Confidence/truthfulness calibration]
-    CAL --> LOGIC[Strictness + evidence-strength overrides]
-    LOGIC --> BIN[Binary enforcement and rationale rewrite]
-    BIN --> OUT[Final verdict payload]
+    PARSE --> NORM[Refute-gate + stance normalization]
+    NORM --> MASS[Deterministic mass aggregation]
+    MASS --> CORE[3-class deterministic evidence-owner policy]
+    CORE --> MAP[Fixed binary mapping: UNVERIFIABLE -> FALSE]
+    MAP --> OUT[Final verdict payload + debug invariants]
 ```
 
 ### Prose Equivalent
 
 1. Verdict stage ingests ranked evidence, optionally recovers missing segment evidence, and formats LLM prompt inputs.
 2. LLM response is parsed and normalized into `claim_breakdown` and `evidence_map`.
-3. Deterministic reconciliation computes verdict consistency from segment statuses.
-4. Numeric/comparative and policy overrides can force deterministic status corrections.
-5. Confidence and truthfulness are calibrated using trust and evidence quality signals.
-6. Strictness logic can cap confidence or override verdict for contradiction dominance and related patterns.
-7. Final payload is normalized, rationale is rewritten for evidence fidelity, and binary enforcement logic is applied when appropriate.
+3. Evidence rows are normalized with contradiction/refute gate features and admission diagnostics.
+4. Deterministic mass aggregation computes admitted `support_mass`, `contradict_mass`, and `neutral_mass`.
+5. A single 3-class deterministic policy sets `verdict_internal` with explicit abstain reasons.
+6. Binary output is a fixed projection of internal verdict (`UNVERIFIABLE -> FALSE`), not a second owner.
+7. Final payload includes consistency invariants and policy/admission traces in debug fields.
 
 ## Component: Segment-Aware Preprocessing
 
@@ -72,28 +69,29 @@ flowchart TD
 6. Failure points and trade-offs
 - LLM may generate structurally valid but logically inconsistent segment assignments, requiring deterministic correction layers.
 
-## Component: Reconciliation Engine (v1 and v2)
+## Component: Deterministic Evidence-Owner Policy
 
 1. Functional role
-- Enforces consistency between segment statuses and top-level verdict.
+- Owns final verdict semantics from admitted evidence masses and sufficiency.
 
 2. Technical mechanism
-- v1 reconciliation computes status-derived verdict and resolved-segment metrics.
-- v2 reconciler can run in enabled or shadow mode with fail-open behavior.
-- Shadow diff instrumentation tracks parity between v1 and v2 outputs.
+- `_compute_deterministic_masses` computes directional masses from admitted evidence only.
+- `_apply_policy_v3_deterministic_projection` derives `verdict_internal`, truth score, and confidence.
+- `_enforce_binary_verdict_payload_deterministic` enforces verdict-field invariants and fixed binary mapping.
+- v2 logic remains shadow-only instrumentation; it does not own active verdict fields.
 
 3. Inputs and outputs
-- Inputs: normalized `claim_breakdown` statuses.
-- Outputs: reconciled verdict decision (`verdict`, resolved/unresolved counts, weighted truth, truth cap).
+- Inputs: normalized `evidence_map`, sufficiency signals, and evidence diagnostics.
+- Outputs: `verdict_internal`, `verdict_binary`, masses, confidence, policy trace, and invariant flags.
 
 4. Interaction with other components
-- Receives normalized LLM outputs; feeds calibration and override stages.
+- Receives normalized LLM outputs and evidence diagnostics, then feeds final payload assembly.
 
 5. Why necessary in this hybrid pipeline
-- Prevents prompt-level inconsistency from leaking directly into final API output.
+- Prevents binary fallback drift and ensures one deterministic decision owner for production output.
 
 6. Failure points and trade-offs
-- Dual-engine reconcile improves migration safety but increases branching complexity.
+- Over-strict admission gates can under-admit directional evidence; debug invariants are required to detect this.
 
 ## Component: Numeric and Comparative Overrides
 
@@ -132,7 +130,7 @@ flowchart TD
 - Outputs: calibrated confidence in [0,1].
 
 4. Interaction with other components
-- Consumes reconciled verdict context and trust diagnostics.
+- Consumes deterministic verdict context and trust diagnostics.
 
 5. Why necessary in this hybrid pipeline
 - Raw LLM confidence is not calibrated to evidence sufficiency dynamics.
@@ -140,46 +138,42 @@ flowchart TD
 6. Failure points and trade-offs
 - Over-aggressive penalties can understate confidence in genuinely strong but narrow evidence sets.
 
-## Component: Strictness and Logic Override Layer
+## Component: Legacy Logic and Shadow Diagnostics
 
 1. Functional role
-- Applies policy-level safety corrections for high-risk claim/evidence configurations.
+- Provides compatibility and observability signals while deterministic policy remains active owner.
 
 2. Technical mechanism
-- `compute_claim_strictness` profiles claim assertiveness/universality/modality/falsifiability.
-- `compute_evidence_strength` scores support strength, hedge penalty, rarity penalty, stance, negation-anchor overlap.
-- `apply_claim_logic_overrides` can trigger:
-  - `CONTRADICTION_DOMINANCE`
-  - `HEDGE_MISMATCH`
-  - `MULTIHOP_RELAXATION`
-  - `DIVERSITY_CAP`
+- Legacy reconciliation and strictness-related computations can still run for diagnostics/shadow comparison.
+- Active verdict fields are overwritten by deterministic evidence-owner projection in final normalization.
 
 3. Inputs and outputs
-- Inputs: strictness profile, evidence strengths, claim breakdown statuses, diversity/agreement metrics.
-- Outputs: overridden verdict/caps plus diagnostics (`override_reason`, key numbers).
+- Inputs: claim/evidence intermediate outputs.
+- Outputs: shadow and telemetry fields (not active decision ownership).
 
 4. Interaction with other components
-- Consumes reconciled verdict context and feeds final payload normalization.
+- Runs before final deterministic payload enforcement.
 
 5. Why necessary in this hybrid pipeline
-- Adds deterministic policy constraints where pure probabilistic synthesis is brittle.
+- Supports migration safety and forensic comparisons without taking ownership of final semantics.
 
 6. Failure points and trade-offs
-- Rule complexity can create edge-case interactions requiring regression coverage.
+- If treated as owner, these layers can reintroduce patch-stacking conflicts; keep them shadow-only.
 
 ## Component: Binary Payload Enforcement and Rationale Fidelity
 
 1. Functional role
-- Final normalization layer ensuring output contract consistency and evidence-grounded explanation quality.
+- Final normalization layer ensuring deterministic contract consistency and evidence-grounded explanation quality.
 
 2. Technical mechanism
 - Normalizes/repairs `evidence_map` and `claim_breakdown` if incomplete.
-- Decides binary verdict only when evidence is decisive; otherwise preserves partial/unverifiable outcomes.
+- Computes internal 3-class decision first, then applies fixed binary projection (`UNVERIFIABLE -> FALSE`).
+- Emits admission diagnostics (`support_labeled_count`, `support_admitted_count`, `refute_labeled_count`, `refute_admitted_count`) and invariant warnings when directional labels fail admission.
 - Rewrites rationale if fidelity against evidence sentences is weak.
 
 3. Inputs and outputs
 - Inputs: post-override verdict payload and evidence context.
-- Outputs: final payload with coherent verdict, truthfulness, confidence, rationale, breakdown, and evidence map.
+- Outputs: final payload with `verdict_internal`, `verdict_binary`, `binary_collapse_reason`, invariant flags, rationale, breakdown, and evidence map.
 
 4. Interaction with other components
 - Final step before pipeline return.
@@ -212,5 +206,5 @@ flowchart TD
 6. Failure points and trade-offs
 - Availability is protected, but epistemic fidelity is reduced in fallback mode.
 
-Last verified against code: March 2, 2026
+Last verified against code: March 10, 2026
 

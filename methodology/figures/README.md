@@ -108,7 +108,7 @@ This directory contains an exhaustive, publication-ready figure suite using IEEE
 | F25 | trust_snapshot/debug.trust_gate |
 | F26 | debug.evidence_stance_distribution |
 | F27 | final_payload policy fields |
-| F28 | policy_trace deterministic_binary_projection |
+| F28 | policy_trace step=`deterministic_evidence_owner` + `binary_collapse_reason` |
 | F29 | debug.verdict_policy_path + policy_trace |
 | F30 | final_payload mass fields |
 | F31 | final_payload confidence + sufficiency_score |

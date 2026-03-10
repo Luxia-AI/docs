@@ -59,10 +59,11 @@ The `figures-highlevel/` subdirectory provides the final publication-facing 20-f
 
 ## Boundary Conditions
 
+- Health-only runtime scope: claims are processed in health mode; there is no active multi-domain routing.
 - No runtime APIs are changed by this documentation set.
 - Existing docs under `docs/` are treated as non-authoritative unless revalidated against code.
 - Terminology baseline: `hybrid corrective RAG fact verification pipeline`.
 
-Last verified against code: March 2, 2026
+Last verified against code: March 10, 2026
 
 

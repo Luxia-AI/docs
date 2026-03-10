@@ -23,28 +23,28 @@ graph TD
 - **Data Source / Log Fields**: policy trace, guard reasons, mass fields.
 - **Export Notes**: SVG/PDF; `2-column`.
 
-## H16 — Binary projection policy and fallback logic
+## H16 — Binary projection policy (fixed mapping)
 - **Figure ID**: H16
 - **Paper Section**: Methods / Output Policy
 - **Type**: flowchart
-- **Research Question**: How is final binary output projected from internal state and fallback rules?
-- **Key Variables**: verdict_internal, truth_score_binary, binary_fallback_reason, verdict_binary
+- **Research Question**: How is final binary output projected from finalized internal verdict?
+- **Key Variables**: verdict_internal, verdict_binary, binary_collapse_reason
 
 ### Mermaid Block
 ```mermaid
 flowchart TD
-  A[Internal Verdict] --> B{Directional?}
-  B -->|yes| C[Keep TRUE/FALSE]
-  B -->|no| D[Binary Projection]
-  D --> E[Fallback Rule Selection]
-  E --> F[verdict_binary]
+  A[verdict_internal] --> B{UNVERIFIABLE?}
+  B -->|yes| C[verdict_binary = FALSE]
+  B -->|no| D[verdict_binary = verdict_internal]
+  C --> E[binary_collapse_reason]
+  D --> F[verdict_binary]
 ```
 
-- **Caption (camera-ready)**: *H16.* Binary projection pathway with explicit fallback reasons.
-- **How to Read**: Decision diamond separates direct directional outputs from projection branch.
-- **Expected Insight**: Exposes where binary coercion occurs.
-- **Failure Signal to Watch**: high fallback frequency in low-alignment cohorts.
-- **Data Source / Log Fields**: `policy_trace`, `binary_fallback_reason`, `verdict_binary`.
+- **Caption (camera-ready)**: *H16.* Fixed binary projection from finalized internal verdict.
+- **How to Read**: Internal verdict is mapped directly; no secondary binary decision owner.
+- **Expected Insight**: Makes abstain-to-binary collapse behavior explicit and auditable.
+- **Failure Signal to Watch**: high `UNVERIFIABLE` rate collapsing to binary `FALSE`.
+- **Data Source / Log Fields**: `verdict_internal`, `verdict_binary`, `binary_collapse_reason`.
 - **Export Notes**: SVG/PDF; `1-column`.
 
 ## H17 — Truth/confidence mass flow (support vs contradiction)

@@ -286,5 +286,5 @@ flowchart TD
 6. Failure points and trade-offs
 - Deterministic IDs improve dedupe but can collapse nuanced relation variants if predicate normalization is too coarse.
 
-Last verified against code: March 2, 2026
+Last verified against code: March 10, 2026
 

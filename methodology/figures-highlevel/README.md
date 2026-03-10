@@ -57,7 +57,7 @@ Deep technical/appendix suite: [../figures/README.md](../figures/README.md)
 | H13 | trust-gate + directional mass signals |
 | H14 | stage latencies and per-run elapsed seconds |
 | H15 | policy trace, guard reasons, support/contradict/neutral masses |
-| H16 | deterministic projection path, `binary_fallback_reason` |
+| H16 | deterministic projection path, `binary_collapse_reason` |
 | H17 | `truth_score_binary`, `confidence`, `sufficiency_score` |
 | H18 | `class_probs`, `calibrated_confidence`, `calibration_meta` |
 | H19 | `evaluation/artifacts/metrics.json` core metrics |
