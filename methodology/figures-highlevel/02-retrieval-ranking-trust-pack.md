@@ -33,11 +33,14 @@ flowchart LR
 
 ### Mermaid Block
 ```mermaid
-xychart-beta
-  title "H10: Retrieval source balance"
-  x-axis [vA, vB, vC, vD]
-  y-axis "Ratio/Rate" 0 --> 1
-  line [0.85, 0.93, 0.71, 0.33]
+flowchart LR
+  A[Version A<br/>KG use high<br/>KG zero-signal high] --> B[Version B<br/>KG over-dominant]
+  B --> C[Version C<br/>balanced KG and VDB]
+  C --> D[Version D<br/>VDB-dominant]
+  A -. quality impact .-> Q1[Higher neutral risk]
+  B -. quality impact .-> Q2[Contradiction under-admission]
+  C -. quality impact .-> Q3[Best stability region]
+  D -. quality impact .-> Q4[Semantic drift risk]
 ```
 
 - **Caption (camera-ready)**: *H10.* Retrieval-source balance profile across versions and runs.

@@ -49,12 +49,9 @@ stateDiagram-v2
 ```mermaid
 flowchart TD
   C[Input Claim] --> S0[Primary Clause]
-  S0 --> S1[Sub-claim 1
-subject-predicate-object]
-  S0 --> S2[Sub-claim 2
-condition/qualifier]
-  S0 --> S3[Sub-claim 3
-population/timeframe]
+  S0 --> S1[Sub-claim 1<br/>subject-predicate-object]
+  S0 --> S2[Sub-claim 2<br/>condition/qualifier]
+  S0 --> S3[Sub-claim 3<br/>population/timeframe]
   S1 --> V1[Validity Check]
   S2 --> V2[Validity Check]
   S3 --> V3[Validity Check]
@@ -88,11 +85,9 @@ flowchart LR
   T[Claim Text] --> E[Entity Extraction]
   E --> P[Predicate Detection]
   P --> O[Object Targeting]
-  O --> Q[Qualifier Parse
-negation/comparator/time]
+  O --> Q[Qualifier Parse<br/>negation/comparator/time]
   Q --> F[Structured Triple Frame]
-  F --> D[Debug Trace
-parse_confidence + failure_reason]
+  F --> D[Debug Trace<br/>parse_confidence + failure_reason]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -117,12 +112,9 @@ parse_confidence + failure_reason]
 #### Mermaid Block
 ```mermaid
 flowchart TB
-  N[Negation Cue
-no/not/never/without] --> PN[Polarity = negative]
-  Q[Quantifier Cue
-all/most/some/exactly] --> QN[Quantifier Class]
-  PN --> C[Consistency Check
-claim vs evidence]
+  N[Negation Cue<br/>no/not/never/without] --> PN[Polarity = negative]
+  Q[Quantifier Cue<br/>all/most/some/exactly] --> QN[Quantifier Class]
+  PN --> C[Consistency Check<br/>claim vs evidence]
   QN --> C
   C --> S1[Support-compatible]
   C --> S2[Refute-compatible]
@@ -151,8 +143,7 @@ claim vs evidence]
 #### Mermaid Block
 ```mermaid
 flowchart LR
-  C[Claim Clause] --> T1[Detect Temporal Expression
-"in 2021", "over 10 years"]
+  C[Claim Clause] --> T1[Detect Temporal Expression<br/>in 2021, over 10 years]
   T1 --> T2[Normalize to Time Window]
   T2 --> T3[Attach to Claim Frame]
   T3 --> T4[Evidence Time Match]

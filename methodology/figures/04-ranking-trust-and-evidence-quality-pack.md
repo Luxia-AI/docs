@@ -15,12 +15,10 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 #### Mermaid Block
 ```mermaid
 flowchart LR
-  I[Candidate Evidence] --> F1[Feature Build
-retrieval/alignment/stance/trust]
+  I[Candidate Evidence] --> F1[Feature Build<br/>retrieval/alignment/stance/trust]
   F1 --> S1[Score Normalization]
   S1 --> S2[Hybrid Rank Score]
-  S2 --> G1[Guardrails
-source quality + diversity]
+  S2 --> G1[Guardrails<br/>source quality + diversity]
   G1 --> T[Top-K shortlist]
   T --> O[Verdict Aggregation Input]
 ```
@@ -179,8 +177,7 @@ flowchart TD
   E[Candidate Evidence] --> C1[Compute contradiction_score]
   C1 --> C2[Evaluate refute_eligibility_score]
   C2 --> G{eligibility >= threshold?}
-  G -- no --> N[Not admitted to refute
-block_reason logged]
+  G -- no --> N[Not admitted to refute<br/>block_reason logged]
   G -- yes --> V{anti-hallucination checks pass?}
   V -- no --> N2[Rejected by guardrail]
   V -- yes --> R[Admit to contradiction mass]

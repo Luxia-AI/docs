@@ -15,8 +15,7 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 #### Mermaid Block
 ```mermaid
 flowchart TD
-  M[Admitted masses
-S/C/N] --> S1{directional evidence present?}
+  M[Admitted masses<br/>S/C/N] --> S1{directional evidence present?}
   S1 -- no --> U[Internal UNVERIFIABLE]
   S1 -- yes --> S2{sufficiency >= threshold?}
   S2 -- no --> U
@@ -53,8 +52,7 @@ flowchart LR
   I[Finalized internal verdict] --> M1{internal == UNVERIFIABLE?}
   M1 -- yes --> B1[verdict_binary = FALSE]
   M1 -- no --> B2[verdict_binary = internal]
-  B1 --> O[Canonical response fields
-verdict/display_verdict/binary]
+  B1 --> O[Canonical response fields<br/>verdict/display_verdict/binary]
   B2 --> O
 ```
 
@@ -80,17 +78,11 @@ verdict/display_verdict/binary]
 #### Mermaid Block
 ```mermaid
 flowchart TB
-  P1[Policy Trace Step 1
-input masses and sufficiency] --> P2[Step 2
-eligibility and guards]
-  P2 --> P3[Step 3
-internal class decision]
-  P3 --> P4[Step 4
-binary projection mapping]
-  P4 --> P5[Step 5
-confidence calibration]
-  P5 --> T[Trace table rows
-step, value, rationale]
+  P1[Policy Trace Step 1<br/>input masses and sufficiency] --> P2[Step 2<br/>eligibility and guards]
+  P2 --> P3[Step 3<br/>internal class decision]
+  P3 --> P4[Step 4<br/>binary projection mapping]
+  P4 --> P5[Step 5<br/>confidence calibration]
+  P5 --> T[Trace table rows<br/>step, value, rationale]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -115,11 +107,9 @@ step, value, rationale]
 #### Mermaid Block
 ```mermaid
 flowchart LR
-  S[Support Mass S] --> D1[Directional Delta
-S - C]
+  S[Support Mass S] --> D1[Directional Delta<br/>S - C]
   C[Contradict Mass C] --> D1
-  N[Neutral Mass N] --> D2[Normalization Term
-S + C + N]
+  N[Neutral Mass N] --> D2[Normalization Term<br/>S + C + N]
   D1 --> TS[truth_score = sigmoid(k*(S-C))]
   D2 --> DG[direction_gap = |S-C|/(S+C+N)]
   TS --> V[Internal Verdict]

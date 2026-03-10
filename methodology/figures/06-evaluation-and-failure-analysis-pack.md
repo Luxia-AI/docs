@@ -16,12 +16,9 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 ```mermaid
 flowchart TB
   M[Evaluation Metrics Stack] --> M1[Accuracy / Macro-F1]
-  M --> M2[Calibration
-ECE, Brier, NLL]
-  M --> M3[Stability
-conflict rate, flip rate]
-  M --> M4[Retrieval Quality
-KG/VDB balance, admission]
+  M --> M2[Calibration<br/>ECE, Brier, NLL]
+  M --> M3[Stability<br/>conflict rate, flip rate]
+  M --> M4[Retrieval Quality<br/>KG/VDB balance, admission]
   M1 --> O[Version report]
   M2 --> O
   M3 --> O
@@ -54,8 +51,7 @@ flowchart LR
   V2 --> V3[v4/v5 policy changes]
   V3 --> V4[v6 contradiction fixes]
   V4 --> V5[v7-v8 deterministic owner]
-  V5 --> M[Trend overlay
-Accuracy, ECE, P95]
+  V5 --> M[Trend overlay<br/>Accuracy, ECE, P95]
   M --> D[Regression checkpoints]
 ```
 
@@ -178,8 +174,7 @@ flowchart TD
   W --> W2[High confidence + false FALSE]
   W1 --> D1[Support over-admission risk]
   W2 --> D2[Contradiction over-admission risk]
-  D1 --> M[Mitigation
-calibration + admission guards]
+  D1 --> M[Mitigation<br/>calibration + admission guards]
   D2 --> M
 ```
 

@@ -15,18 +15,12 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 #### Mermaid Block
 ```mermaid
 flowchart LR
-  C[Claim Intake] --> U[Claim Understanding
-entity/predicate/quantifier]
-  U --> R[Hybrid Retrieval
-VDB + KG + corrective search]
-  R --> A[Evidence Validation
-stance + alignment + trust]
-  A --> P[Deterministic Policy
-3-class owner]
-  P --> B[Binary Projection
-TRUE/FALSE map]
-  B --> O[API Response
-verdict + confidence + debug]
+  C[Claim Intake] --> U[Claim Understanding<br/>entity/predicate/quantifier]
+  U --> R[Hybrid Retrieval<br/>VDB + KG + corrective search]
+  R --> A[Evidence Validation<br/>stance + alignment + trust]
+  A --> P[Deterministic Policy<br/>3-class owner]
+  P --> B[Binary Projection<br/>TRUE/FALSE map]
+  B --> O[API Response<br/>verdict + confidence + debug]
   O -. telemetry .-> E[(Evaluation Artifacts)]
 ```
 
@@ -137,8 +131,7 @@ flowchart TD
   OL1[Online Claim Request] --> OL2[Runtime Retrieval + Verdict]
   OL2 --> OL3[Response + Debug Trace]
   OL3 --> OFF1[(Evaluation Log Store)]
-  OFF1 --> OFF2[Offline Metrics
-Acc/F1/ECE/Brier/NLL]
+  OFF1 --> OFF2[Offline Metrics<br/>Acc/F1/ECE/Brier/NLL]
   OFF2 --> OFF3[Error Taxonomy + Drift Report]
   OFF3 --> OFF4[Policy/Weight Update Proposal]
   OFF4 -. guarded rollout .-> OL2
@@ -166,19 +159,12 @@ Acc/F1/ECE/Brier/NLL]
 #### Mermaid Block
 ```mermaid
 flowchart LR
-  RQ1[Research Question
-stable evidence ownership] --> C1[Contribution A
-deterministic verdict policy]
-  RQ1 --> C2[Contribution B
-dual-source retrieval diagnostics]
-  RQ1 --> C3[Contribution C
-calibrated confidence reporting]
-  C1 --> V1[Observed Gain
-lower verdict conflict]
-  C2 --> V2[Observed Gain
-higher contradiction admission]
-  C3 --> V3[Observed Gain
-improved calibration error]
+  RQ1[Research Question<br/>stable evidence ownership] --> C1[Contribution A<br/>deterministic verdict policy]
+  RQ1 --> C2[Contribution B<br/>dual-source retrieval diagnostics]
+  RQ1 --> C3[Contribution C<br/>calibrated confidence reporting]
+  C1 --> V1[Observed Gain<br/>lower verdict conflict]
+  C2 --> V2[Observed Gain<br/>higher contradiction admission]
+  C3 --> V3[Observed Gain<br/>improved calibration error]
 ```
 
 #### Figure Spec (Camera-Ready)

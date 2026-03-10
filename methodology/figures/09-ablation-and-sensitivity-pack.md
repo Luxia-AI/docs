@@ -110,8 +110,7 @@ flowchart LR
   Q[Query strategy variants] --> Q1[support-heavy]
   Q --> Q2[balanced support/refute]
   Q --> Q3[authority-heavy]
-  Q1 --> M[Measure contradiction admission
-+ final metrics]
+  Q1 --> M[Measure contradiction admission<br/>+ final metrics]
   Q2 --> M
   Q3 --> M
   M --> O[Recommended strategy map]

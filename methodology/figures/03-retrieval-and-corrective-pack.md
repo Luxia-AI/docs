@@ -93,8 +93,7 @@ flowchart TB
 flowchart LR
   E[Claim Entities] --> N1[Seed KG Nodes]
   N1 --> X1[Predicate-constrained Expansion]
-  X1 --> X2[Neighbor Pruning
-confidence + relation type]
+  X1 --> X2[Neighbor Pruning<br/>confidence + relation type]
   X2 --> P1[Path Scoring]
   P1 --> C1[Candidate Assertions]
   C1 --> F1[Retrieval Fusion Input]
@@ -161,8 +160,7 @@ flowchart LR
   Q2 --> D
   Q3 --> D
   Q4 --> D
-  D --> E[Executable Query Lattice
-with facet tags]
+  D --> E[Executable Query Lattice<br/>with facet tags]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -226,8 +224,7 @@ flowchart TD
   B1 -- yes --> R[Run Next Query Batch]
   R --> Y{new directional evidence?}
   Y -- yes --> C[Increase sufficiency]
-  Y -- no --> P[Decrease sufficiency
-zero-yield penalty]
+  Y -- no --> P[Decrease sufficiency<br/>zero-yield penalty]
   C --> G{stop criterion met?}
   P --> G
   G -- yes --> END
