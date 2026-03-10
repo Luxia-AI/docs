@@ -14,10 +14,18 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 
 #### Mermaid Block
 ```mermaid
-flowchart LR
-    A[Signal A] --> B[Interpretation A]
-    C[Signal B] --> D[Interpretation B]
-    E[Signal C] --> F[Interpretation C]
+flowchart TB
+  M[Evaluation Metrics Stack] --> M1[Accuracy / Macro-F1]
+  M --> M2[Calibration
+ECE, Brier, NLL]
+  M --> M3[Stability
+conflict rate, flip rate]
+  M --> M4[Retrieval Quality
+KG/VDB balance, admission]
+  M1 --> O[Version report]
+  M2 --> O
+  M3 --> O
+  M4 --> O
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -41,11 +49,14 @@ flowchart LR
 
 #### Mermaid Block
 ```mermaid
-xychart-beta
-    title "F36: Version progression timeline"
-    x-axis [Low, Mid, High, Extreme]
-    y-axis "Value" 0 --> 100
-    line [22, 48, 63, 79]
+flowchart LR
+  V1[v2 baseline] --> V2[v3.x iterations]
+  V2 --> V3[v4/v5 policy changes]
+  V3 --> V4[v6 contradiction fixes]
+  V4 --> V5[v7-v8 deterministic owner]
+  V5 --> M[Trend overlay
+Accuracy, ECE, P95]
+  M --> D[Regression checkpoints]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -69,10 +80,15 @@ xychart-beta
 
 #### Mermaid Block
 ```mermaid
-graph LR
-    A[Cause 1] --> C[Outcome]
-    B[Cause 2] --> C
-    C --> D[Observed Metric Shift]
+flowchart LR
+  E[All errors] --> E1[Retrieval miss]
+  E --> E2[Alignment miss]
+  E --> E3[Stance misclassification]
+  E --> E4[Policy conflict]
+  E1 --> O1[Wrong/abstain verdict]
+  E2 --> O1
+  E3 --> O1
+  E4 --> O1
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -97,9 +113,12 @@ graph LR
 #### Mermaid Block
 ```mermaid
 flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F38: Failure propagation chain diagram]
+  F1[Parsing weakness] --> F2[Weak queries]
+  F2 --> F3[Low-quality retrieval]
+  F3 --> F4[Stance uncertainty]
+  F4 --> F5[Low directional mass]
+  F5 --> F6[UNVERIFIABLE collapse or wrong binary]
+  F6 --> F7[Metric degradation]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -124,9 +143,13 @@ flowchart TD
 #### Mermaid Block
 ```mermaid
 flowchart LR
-    A[Signal A] --> B[Interpretation A]
-    C[Signal B] --> D[Interpretation B]
-    E[Signal C] --> F[Interpretation C]
+  C[Alignment=0 cohort] --> A1[Evidence topical but non-claim-specific]
+  C --> A2[Predicate/object mismatch]
+  C --> A3[Temporal/population mismatch]
+  A1 --> R[High neutral rate]
+  A2 --> R
+  A3 --> R
+  R --> O[Action: query/admission refinement]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -150,11 +173,14 @@ flowchart LR
 
 #### Mermaid Block
 ```mermaid
-xychart-beta
-    title "F40: Confident-wrong decomposition"
-    x-axis [Low, Mid, High, Extreme]
-    y-axis "Value" 0 --> 100
-    line [22, 48, 63, 79]
+flowchart TD
+  W[Confident Wrong Cases] --> W1[High confidence + false TRUE]
+  W --> W2[High confidence + false FALSE]
+  W1 --> D1[Support over-admission risk]
+  W2 --> D2[Contradiction over-admission risk]
+  D1 --> M[Mitigation
+calibration + admission guards]
+  D2 --> M
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -179,9 +205,13 @@ xychart-beta
 #### Mermaid Block
 ```mermaid
 flowchart LR
-    A[Signal A] --> B[Interpretation A]
-    C[Signal B] --> D[Interpretation B]
-    E[Signal C] --> F[Interpretation C]
+  K[KG contribution ratio] --> B[Balance monitor]
+  V[VDB contribution ratio] --> B
+  B --> Z1[KG-dominant neutral risk]
+  B --> Z2[VDB-dominant semantic drift risk]
+  Z1 --> A[Adaptive weighting]
+  Z2 --> A
+  A --> O[Balanced retrieval mix KPI]
 ```
 
 #### Figure Spec (Camera-Ready)

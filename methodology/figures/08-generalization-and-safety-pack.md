@@ -14,10 +14,15 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 
 #### Mermaid Block
 ```mermaid
-flowchart LR
-    A[Signal A] --> B[Interpretation A]
-    C[Signal B] --> D[Interpretation B]
-    E[Signal C] --> F[Interpretation C]
+flowchart TB
+  C[Compliance checklist] --> C1[No claim hardcoding]
+  C --> C2[No entity-specific branching]
+  C --> C3[Retrieval path not bypassed]
+  C --> C4[Deterministic policy ownership]
+  C1 --> A[Audit artifacts]
+  C2 --> A
+  C3 --> A
+  C4 --> A
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -41,10 +46,12 @@ flowchart LR
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F47: Domain-boundary enforcement flow]
+flowchart LR
+  I[Incoming claim] --> H{health-scope compatible?}
+  H -- no --> R[reject/out-of-scope handling]
+  H -- yes --> P[health-only retrieval namespaces]
+  P --> V[verification pipeline]
+  V --> O[verdict payload]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -68,12 +75,13 @@ flowchart TD
 
 #### Mermaid Block
 ```mermaid
-graph TD
-    A[Input Signals] --> B[Intermediate Signal A]
-    A --> C[Intermediate Signal B]
-    B --> D[Decision Node]
-    C --> D
-    D --> E[F48: Hallucination containment controls]
+flowchart TD
+  R[Retrieved evidence] --> G1[Source credibility gate]
+  G1 --> G2[Claim alignment gate]
+  G2 --> G3[Stance confidence gate]
+  G3 --> G4[Contradiction admission gate]
+  G4 --> A[Admitted evidence only]
+  A --> V[Deterministic verdict policy]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -97,11 +105,13 @@ graph TD
 
 #### Mermaid Block
 ```mermaid
-xychart-beta
-    title "F49: Robustness under low-evidence conditions"
-    x-axis [Low, Mid, High, Extreme]
-    y-axis "Value" 0 --> 100
-    line [22, 48, 63, 79]
+flowchart LR
+  L1[Low evidence count] --> P1[Lower sufficiency]
+  L2[Low source diversity] --> P2[Confidence penalty]
+  L3[High neutral dominance] --> P3[UNVERIFIABLE tendency]
+  P1 --> O[Robust low-evidence behavior]
+  P2 --> O
+  P3 --> O
 ```
 
 #### Figure Spec (Camera-Ready)

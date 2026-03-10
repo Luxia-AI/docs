@@ -14,10 +14,20 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F01: End-to-end pipeline architecture]
+flowchart LR
+  C[Claim Intake] --> U[Claim Understanding
+entity/predicate/quantifier]
+  U --> R[Hybrid Retrieval
+VDB + KG + corrective search]
+  R --> A[Evidence Validation
+stance + alignment + trust]
+  A --> P[Deterministic Policy
+3-class owner]
+  P --> B[Binary Projection
+TRUE/FALSE map]
+  B --> O[API Response
+verdict + confidence + debug]
+  O -. telemetry .-> E[(Evaluation Artifacts)]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -41,10 +51,26 @@ flowchart TD
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F02: Layered subsystem map]
+flowchart TB
+  subgraph ControlPlane[Control Plane]
+    CP1[API Gateway]
+    CP2[Dispatcher]
+    CP3[Room/Queue State]
+  end
+  subgraph WorkerPlane[Worker Plane]
+    W1[Claim Parser]
+    W2[Retrieval Orchestrator]
+    W3[Verdict Engine]
+  end
+  subgraph DataPlane[Data Plane]
+    D1[(Vector Index)]
+    D2[(Knowledge Graph)]
+    D3[(Evidence Cache)]
+  end
+  CP1 --> CP2 --> CP3 --> W1 --> W2 --> W3
+  W2 --> D1
+  W2 --> D2
+  W3 --> D3
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -68,10 +94,22 @@ flowchart TD
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F03: Data/control plane separation]
+flowchart LR
+  subgraph Control[Control Plane Signals]
+    C1[job_id / run_id]
+    C2[queue status]
+    C3[retry policy]
+  end
+  subgraph Data[Data Plane Flow]
+    D1[claim frame]
+    D2[evidence candidates]
+    D3[ranked evidence]
+    D4[verdict payload]
+  end
+  C1 --> C2 --> C3
+  D1 --> D2 --> D3 --> D4
+  C2 -. trigger .-> D1
+  D4 -. stage metrics .-> C3
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -96,9 +134,14 @@ flowchart TD
 #### Mermaid Block
 ```mermaid
 flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F04: Online vs offline evaluation loop]
+  OL1[Online Claim Request] --> OL2[Runtime Retrieval + Verdict]
+  OL2 --> OL3[Response + Debug Trace]
+  OL3 --> OFF1[(Evaluation Log Store)]
+  OFF1 --> OFF2[Offline Metrics
+Acc/F1/ECE/Brier/NLL]
+  OFF2 --> OFF3[Error Taxonomy + Drift Report]
+  OFF3 --> OFF4[Policy/Weight Update Proposal]
+  OFF4 -. guarded rollout .-> OL2
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -122,10 +165,20 @@ flowchart TD
 
 #### Mermaid Block
 ```mermaid
-graph LR
-    A[Cause 1] --> C[Outcome]
-    B[Cause 2] --> C
-    C --> D[Observed Metric Shift]
+flowchart LR
+  RQ1[Research Question
+stable evidence ownership] --> C1[Contribution A
+deterministic verdict policy]
+  RQ1 --> C2[Contribution B
+dual-source retrieval diagnostics]
+  RQ1 --> C3[Contribution C
+calibrated confidence reporting]
+  C1 --> V1[Observed Gain
+lower verdict conflict]
+  C2 --> V2[Observed Gain
+higher contradiction admission]
+  C3 --> V3[Observed Gain
+improved calibration error]
 ```
 
 #### Figure Spec (Camera-Ready)

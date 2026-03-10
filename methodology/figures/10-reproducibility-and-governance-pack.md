@@ -14,12 +14,14 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 
 #### Mermaid Block
 ```mermaid
-graph TD
-    A[Input Signals] --> B[Intermediate Signal A]
-    A --> C[Intermediate Signal B]
-    B --> D[Decision Node]
-    C --> D
-    D --> E[F54: Artifact lineage graph]
+flowchart TD
+  C[Claim Input Artifact] --> R[Retrieval Artifact]
+  R --> E[Evidence Artifact]
+  E --> V[Verdict Artifact]
+  V --> M[Metrics Artifact]
+  M --> A[Analysis Report Artifact]
+  C -. lineage id .-> A
+  V -. policy trace id .-> A
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -43,10 +45,14 @@ graph TD
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F55: Experiment protocol schedule]
+flowchart LR
+  D0[Daily protocol] --> D1[anchor set run]
+  D1 --> D2[failed-claim replay]
+  D2 --> D3[analyze_runs export]
+  D3 --> W0[Weekly protocol]
+  W0 --> W1[canary comparison]
+  W1 --> W2[promotion gate review]
+  W2 --> W3[version release decision]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -71,12 +77,16 @@ flowchart TD
 #### Mermaid Block
 ```mermaid
 stateDiagram-v2
-    [*] --> Intake
-    Intake --> Normalize
-    Normalize --> Retrieve
-    Retrieve --> Evaluate
-    Evaluate --> Decide
-    Decide --> [*]
+  [*] --> DailyRun
+  DailyRun --> Diagnostics
+  Diagnostics --> HotfixCandidate: severe regression
+  Diagnostics --> WeeklyCanary: stable
+  WeeklyCanary --> PromotionReview
+  PromotionReview --> Released: gates passed
+  PromotionReview --> Rollback: gates failed
+  HotfixCandidate --> DailyRun
+  Released --> [*]
+  Rollback --> [*]
 ```
 
 #### Figure Spec (Camera-Ready)

@@ -15,12 +15,15 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 #### Mermaid Block
 ```mermaid
 stateDiagram-v2
-    [*] --> Intake
-    Intake --> Normalize
-    Normalize --> Retrieve
-    Retrieve --> Evaluate
-    Evaluate --> Decide
-    Decide --> [*]
+  [*] --> RawClaim
+  RawClaim --> Normalized: text_clean
+  Normalized --> EntityParsed: entities_found
+  EntityParsed --> PredicateParsed: predicate_target_found
+  PredicateParsed --> QuantifierParsed: polarity/quantifier parsed
+  QuantifierParsed --> ClaimFrameReady: completeness >= threshold
+  QuantifierParsed --> ParseFallback: incomplete frame
+  ParseFallback --> ClaimFrameReady
+  ClaimFrameReady --> [*]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -44,12 +47,20 @@ stateDiagram-v2
 
 #### Mermaid Block
 ```mermaid
-graph TD
-    A[Input Signals] --> B[Intermediate Signal A]
-    A --> C[Intermediate Signal B]
-    B --> D[Decision Node]
-    C --> D
-    D --> E[F07: Sub-claim decomposition tree]
+flowchart TD
+  C[Input Claim] --> S0[Primary Clause]
+  S0 --> S1[Sub-claim 1
+subject-predicate-object]
+  S0 --> S2[Sub-claim 2
+condition/qualifier]
+  S0 --> S3[Sub-claim 3
+population/timeframe]
+  S1 --> V1[Validity Check]
+  S2 --> V2[Validity Check]
+  S3 --> V3[Validity Check]
+  V1 --> M[Sub-claim Set]
+  V2 --> M
+  V3 --> M
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -73,10 +84,15 @@ graph TD
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F08: Entity-predicate-object extraction flow]
+flowchart LR
+  T[Claim Text] --> E[Entity Extraction]
+  E --> P[Predicate Detection]
+  P --> O[Object Targeting]
+  O --> Q[Qualifier Parse
+negation/comparator/time]
+  Q --> F[Structured Triple Frame]
+  F --> D[Debug Trace
+parse_confidence + failure_reason]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -100,10 +116,17 @@ flowchart TD
 
 #### Mermaid Block
 ```mermaid
-flowchart LR
-    A[Signal A] --> B[Interpretation A]
-    C[Signal B] --> D[Interpretation B]
-    E[Signal C] --> F[Interpretation C]
+flowchart TB
+  N[Negation Cue
+no/not/never/without] --> PN[Polarity = negative]
+  Q[Quantifier Cue
+all/most/some/exactly] --> QN[Quantifier Class]
+  PN --> C[Consistency Check
+claim vs evidence]
+  QN --> C
+  C --> S1[Support-compatible]
+  C --> S2[Refute-compatible]
+  C --> S3[Neutral/unclear]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -127,10 +150,14 @@ flowchart LR
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F10: Temporal qualifier handling logic]
+flowchart LR
+  C[Claim Clause] --> T1[Detect Temporal Expression
+"in 2021", "over 10 years"]
+  T1 --> T2[Normalize to Time Window]
+  T2 --> T3[Attach to Claim Frame]
+  T3 --> T4[Evidence Time Match]
+  T4 --> T5[Temporal Alignment Score]
+  T5 --> T6[Verdict Policy Input]
 ```
 
 #### Figure Spec (Camera-Ready)

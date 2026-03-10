@@ -15,16 +15,22 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 #### Mermaid Block
 ```mermaid
 sequenceDiagram
-    participant I as Intake
-    participant Q as Query Designer
-    participant R as Retriever
-    participant K as Ranker/Trust
-    participant V as Verdict
-    I->>Q: claim + entities
-    Q->>R: support/refute query tracks
-    R->>K: VDB+KG candidates
-    K->>V: aligned evidence + policy signals
-    V-->>I: F11 decision trace
+  participant W as Worker
+  participant V as VectorDB
+  participant K as KG
+  participant S as Web Search
+  participant R as Ranker
+  W->>V: semantic_query(claim_frame)
+  W->>K: graph_query(entities,predicate)
+  V-->>W: vector_candidates
+  K-->>W: kg_candidates
+  W->>R: merge_and_rank(candidates)
+  alt insufficient evidence
+    W->>S: corrective_query(batch)
+    S-->>W: corrective_candidates
+    W->>R: rerank_with_new_candidates
+  end
+  R-->>W: ranked_evidence_pool
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -48,11 +54,19 @@ sequenceDiagram
 
 #### Mermaid Block
 ```mermaid
-xychart-beta
-    title "F12: VDB retrieval decision surface"
-    x-axis [Low, Mid, High, Extreme]
-    y-axis "Value" 0 --> 100
-    line [22, 48, 63, 79]
+flowchart TB
+  Q[Query Embedding] --> S1[Similarity Score]
+  S1 --> F1[Filter by semantic_floor]
+  F1 --> K1[Top-k selection]
+  K1 --> D1[Directness scoring]
+  D1 --> O1[Pass to fusion]
+  subgraph Decision Surface
+    A1[high similarity + high directness -> admit]
+    A2[high similarity + low directness -> neutral risk]
+    A3[low similarity + high directness -> keep for review]
+    A4[low similarity + low directness -> drop]
+  end
+  O1 -. classify .-> Decision Surface
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -76,12 +90,14 @@ xychart-beta
 
 #### Mermaid Block
 ```mermaid
-graph TD
-    A[Input Signals] --> B[Intermediate Signal A]
-    A --> C[Intermediate Signal B]
-    B --> D[Decision Node]
-    C --> D
-    D --> E[F13: KG traversal and expansion graph]
+flowchart LR
+  E[Claim Entities] --> N1[Seed KG Nodes]
+  N1 --> X1[Predicate-constrained Expansion]
+  X1 --> X2[Neighbor Pruning
+confidence + relation type]
+  X2 --> P1[Path Scoring]
+  P1 --> C1[Candidate Assertions]
+  C1 --> F1[Retrieval Fusion Input]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -105,12 +121,14 @@ graph TD
 
 #### Mermaid Block
 ```mermaid
-graph TD
-    A[Input Signals] --> B[Intermediate Signal A]
-    A --> C[Intermediate Signal B]
-    B --> D[Decision Node]
-    C --> D
-    D --> E[F14: Retrieval fusion DAG]
+flowchart TD
+  V[Vector Candidates] --> U[Unified Candidate Pool]
+  K[KG Candidates] --> U
+  W[Web Corrective Candidates] --> U
+  U --> R1[Normalize Scores]
+  R1 --> R2[Source-aware Reweighting]
+  R2 --> R3[Deduplicate by canonical source+span]
+  R3 --> R4[Top-N ranked evidence]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -134,10 +152,17 @@ graph TD
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F15: Query generation lattice (support/refute tracks)]
+flowchart LR
+  C[Canonical Claim Frame] --> Q1[Support Track Queries]
+  C --> Q2[Refute Track Queries]
+  C --> Q3[Authority Track Queries]
+  C --> Q4[Exact/Rephrase Track]
+  Q1 --> D[Query Dedup + Quality Filter]
+  Q2 --> D
+  Q3 --> D
+  Q4 --> D
+  D --> E[Executable Query Lattice
+with facet tags]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -162,12 +187,16 @@ flowchart TD
 #### Mermaid Block
 ```mermaid
 stateDiagram-v2
-    [*] --> Intake
-    Intake --> Normalize
-    Normalize --> Retrieve
-    Retrieve --> Evaluate
-    Evaluate --> Decide
-    Decide --> [*]
+  [*] --> InitialRetrieve
+  InitialRetrieve --> Evaluate
+  Evaluate --> Stop: sufficient evidence
+  Evaluate --> CorrectiveSearch: insufficiency
+  CorrectiveSearch --> Extract
+  Extract --> Evaluate: yield > 0
+  Extract --> Penalize: zero_yield
+  Penalize --> Evaluate
+  Penalize --> Stop: budget exhausted
+  Stop --> [*]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -192,9 +221,17 @@ stateDiagram-v2
 #### Mermaid Block
 ```mermaid
 flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F17: Query budget and stop-criterion flow]
+  S[Start Round] --> B1{query_budget_used < total?}
+  B1 -- no --> END[Stop: budget exhausted]
+  B1 -- yes --> R[Run Next Query Batch]
+  R --> Y{new directional evidence?}
+  Y -- yes --> C[Increase sufficiency]
+  Y -- no --> P[Decrease sufficiency
+zero-yield penalty]
+  C --> G{stop criterion met?}
+  P --> G
+  G -- yes --> END
+  G -- no --> S
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -218,10 +255,15 @@ flowchart TD
 
 #### Mermaid Block
 ```mermaid
-flowchart LR
-    A[Signal A] --> B[Interpretation A]
-    C[Signal B] --> D[Interpretation B]
-    E[Signal C] --> F[Interpretation C]
+flowchart TB
+  A[All retrieved URLs] --> B[Trusted-domain filter]
+  B --> C[Content-type filter]
+  C --> D[Extractable page filter]
+  D --> E[Claim-directness filter]
+  E --> F[Admissible evidence set]
+  A -. rejected .-> R1[Rejected: off-domain]
+  C -. rejected .-> R2[Rejected: unsupported mime]
+  D -. rejected .-> R3[Rejected: extraction failure]
 ```
 
 #### Figure Spec (Camera-Ready)

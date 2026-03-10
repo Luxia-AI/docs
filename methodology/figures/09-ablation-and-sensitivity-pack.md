@@ -14,10 +14,14 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 
 #### Mermaid Block
 ```mermaid
-flowchart LR
-    A[Signal A] --> B[Interpretation A]
-    C[Signal B] --> D[Interpretation B]
-    E[Signal C] --> F[Interpretation C]
+flowchart TB
+  W[Retrieval weight settings] --> W1[High VDB / Low KG]
+  W --> W2[Balanced]
+  W --> W3[Low VDB / High KG]
+  W1 --> M[Measure Acc/F1/ECE/conflict]
+  W2 --> M
+  W3 --> M
+  M --> S[Select stable weighting region]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -41,11 +45,13 @@ flowchart LR
 
 #### Mermaid Block
 ```mermaid
-xychart-beta
-    title "F51: Trust-threshold sensitivity curves"
-    x-axis [Low, Mid, High, Extreme]
-    y-axis "Value" 0 --> 100
-    line [22, 48, 63, 79]
+flowchart LR
+  T1[Low trust threshold] --> R1[High recall, low precision]
+  T2[Medium threshold] --> R2[Balanced precision/recall]
+  T3[High threshold] --> R3[Low recall, high precision]
+  R1 --> O[Operating curve]
+  R2 --> O
+  R3 --> O
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -69,10 +75,14 @@ xychart-beta
 
 #### Mermaid Block
 ```mermaid
-flowchart LR
-    A[Signal A] --> B[Interpretation A]
-    C[Signal B] --> D[Interpretation B]
-    E[Signal C] --> F[Interpretation C]
+flowchart TB
+  C[Calibration methods] --> C1[Temperature scaling]
+  C --> C2[Isotonic regression]
+  C --> C3[No calibration baseline]
+  C1 --> E[Compare ECE/Brier/NLL]
+  C2 --> E
+  C3 --> E
+  E --> S[Method selection for deployment]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -96,10 +106,15 @@ flowchart LR
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F53: Query-strategy ablation map]
+flowchart LR
+  Q[Query strategy variants] --> Q1[support-heavy]
+  Q --> Q2[balanced support/refute]
+  Q --> Q3[authority-heavy]
+  Q1 --> M[Measure contradiction admission
++ final metrics]
+  Q2 --> M
+  Q3 --> M
+  M --> O[Recommended strategy map]
 ```
 
 #### Figure Spec (Camera-Ready)

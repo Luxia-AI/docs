@@ -14,12 +14,18 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 
 #### Mermaid Block
 ```mermaid
-graph TD
-    A[Input Signals] --> B[Intermediate Signal A]
-    A --> C[Intermediate Signal B]
-    B --> D[Decision Node]
-    C --> D
-    D --> E[F27: Internal verdict policy graph]
+flowchart TD
+  M[Admitted masses
+S/C/N] --> S1{directional evidence present?}
+  S1 -- no --> U[Internal UNVERIFIABLE]
+  S1 -- yes --> S2{sufficiency >= threshold?}
+  S2 -- no --> U
+  S2 -- yes --> S3{S > C ?}
+  S3 -- yes --> T[Internal TRUE]
+  S3 -- no --> F[Internal FALSE]
+  T --> O[Final policy trace]
+  F --> O
+  U --> O
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -43,10 +49,13 @@ graph TD
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F28: Binary projection logic graph]
+flowchart LR
+  I[Finalized internal verdict] --> M1{internal == UNVERIFIABLE?}
+  M1 -- yes --> B1[verdict_binary = FALSE]
+  M1 -- no --> B2[verdict_binary = internal]
+  B1 --> O[Canonical response fields
+verdict/display_verdict/binary]
+  B2 --> O
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -70,10 +79,18 @@ flowchart TD
 
 #### Mermaid Block
 ```mermaid
-flowchart LR
-    A[Signal A] --> B[Interpretation A]
-    C[Signal B] --> D[Interpretation B]
-    E[Signal C] --> F[Interpretation C]
+flowchart TB
+  P1[Policy Trace Step 1
+input masses and sufficiency] --> P2[Step 2
+eligibility and guards]
+  P2 --> P3[Step 3
+internal class decision]
+  P3 --> P4[Step 4
+binary projection mapping]
+  P4 --> P5[Step 5
+confidence calibration]
+  P5 --> T[Trace table rows
+step, value, rationale]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -97,10 +114,16 @@ flowchart LR
 
 #### Mermaid Block
 ```mermaid
-graph LR
-    A[Cause 1] --> C[Outcome]
-    B[Cause 2] --> C
-    C --> D[Observed Metric Shift]
+flowchart LR
+  S[Support Mass S] --> D1[Directional Delta
+S - C]
+  C[Contradict Mass C] --> D1
+  N[Neutral Mass N] --> D2[Normalization Term
+S + C + N]
+  D1 --> TS[truth_score = sigmoid(k*(S-C))]
+  D2 --> DG[direction_gap = |S-C|/(S+C+N)]
+  TS --> V[Internal Verdict]
+  DG --> CF[Confidence Composition]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -124,11 +147,14 @@ graph LR
 
 #### Mermaid Block
 ```mermaid
-xychart-beta
-    title "F31: Confidence composition chart"
-    x-axis [Low, Mid, High, Extreme]
-    y-axis "Value" 0 --> 100
-    line [22, 48, 63, 79]
+flowchart TD
+  S1[Sufficiency Score] --> C[confidence_raw]
+  S2[Direction Gap] --> C
+  S3[Evidence Quality] --> C
+  C --> P1[Conflict Penalty]
+  P1 --> P2[Rejection-rate Penalty]
+  P2 --> CL[Clamp to [0.05, 0.95]]
+  CL --> OUT[Final confidence]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -152,10 +178,14 @@ xychart-beta
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F32: Class-probability coherence projection]
+flowchart LR
+  R[Raw class probabilities] --> N[Normalization + coherence checks]
+  N --> C1[Check sum ~= 1.0]
+  N --> C2[Check ordering vs masses]
+  C1 --> P[Projected probability vector]
+  C2 --> P
+  P --> V[Consistency with internal verdict]
+  V --> O[Payload class_probs]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -179,10 +209,15 @@ flowchart TD
 
 #### Mermaid Block
 ```mermaid
-flowchart LR
-    A[Signal A] --> B[Interpretation A]
-    C[Signal B] --> D[Interpretation B]
-    E[Signal C] --> F[Interpretation C]
+flowchart TD
+  A[Abstain reasons] --> A1[insufficient_directional_evidence]
+  A --> A2[low_sufficiency]
+  A --> A3[conflicting_high_quality_evidence]
+  A --> A4[canonical_parse_failure_guarded]
+  A1 --> O[verdict_internal=UNVERIFIABLE]
+  A2 --> O
+  A3 --> O
+  A4 --> O
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -206,10 +241,14 @@ flowchart LR
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F34: Confidence calibration pipeline]
+flowchart LR
+  P[Raw confidence] --> B1[Bucket by predicted class]
+  B1 --> C1[Temperature scaling]
+  C1 --> C2[Isotonic fallback]
+  C2 --> E1[Evaluate ECE/Brier/NLL]
+  E1 --> G{regression?}
+  G -- yes --> R[Reject calibration update]
+  G -- no --> D[Deploy calibrated confidence]
 ```
 
 #### Figure Spec (Camera-Ready)

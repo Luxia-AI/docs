@@ -14,11 +14,15 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 
 #### Mermaid Block
 ```mermaid
-xychart-beta
-    title "F42: Stage-wise latency waterfall"
-    x-axis [Low, Mid, High, Extreme]
-    y-axis "Value" 0 --> 100
-    line [22, 48, 63, 79]
+flowchart LR
+  S1[Intake] --> S2[Claim understanding]
+  S2 --> S3[Retrieval]
+  S3 --> S4[Correction loop]
+  S4 --> S5[Ranking/stance]
+  S5 --> S6[Verdict]
+  S1 -. latency ms .-> L[Waterfall labels per stage]
+  S3 -. latency ms .-> L
+  S5 -. latency ms .-> L
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -42,11 +46,13 @@ xychart-beta
 
 #### Mermaid Block
 ```mermaid
-xychart-beta
-    title "F43: p50/p95/p99 profile curves"
-    x-axis [Low, Mid, High, Extreme]
-    y-axis "Value" 0 --> 100
-    line [22, 48, 63, 79]
+flowchart TB
+  T[Latency Profile] --> P50[p50 stable path]
+  T --> P95[p95 heavy retrieval path]
+  T --> P99[p99 timeout/retry path]
+  P50 --> C1[baseline capacity planning]
+  P95 --> C2[slo guardrail]
+  P99 --> C3[incident triage]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -70,11 +76,14 @@ xychart-beta
 
 #### Mermaid Block
 ```mermaid
-xychart-beta
-    title "F44: Throughput vs quality frontier"
-    x-axis [Low, Mid, High, Extreme]
-    y-axis "Value" 0 --> 100
-    line [22, 48, 63, 79]
+flowchart LR
+  Q1[Low throughput] --> A1[Higher evidence depth]
+  Q2[Balanced throughput] --> A2[Best quality-cost point]
+  Q3[High throughput] --> A3[Lower evidence depth]
+  A1 --> F[Quality frontier]
+  A2 --> F
+  A3 --> F
+  F --> D[Operating point selection]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -98,11 +107,13 @@ xychart-beta
 
 #### Mermaid Block
 ```mermaid
-xychart-beta
-    title "F45: Corrective-loop cost curve"
-    x-axis [Low, Mid, High, Extreme]
-    y-axis "Value" 0 --> 100
-    line [22, 48, 63, 79]
+flowchart TD
+  R1[Corrective round count] --> C1[API/search cost]
+  R1 --> C2[Latency cost]
+  R1 --> B1[Marginal evidence gain]
+  B1 --> G{gain still positive?}
+  G -- yes --> NEXT[allow next round]
+  G -- no --> STOP[early stop to control cost]
 ```
 
 #### Figure Spec (Camera-Ready)

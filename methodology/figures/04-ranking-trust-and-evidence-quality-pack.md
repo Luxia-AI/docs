@@ -14,10 +14,15 @@ This pack defines publication-ready figure specs and Mermaid drafts.
 
 #### Mermaid Block
 ```mermaid
-flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F19: Candidate ranking pipeline]
+flowchart LR
+  I[Candidate Evidence] --> F1[Feature Build
+retrieval/alignment/stance/trust]
+  F1 --> S1[Score Normalization]
+  S1 --> S2[Hybrid Rank Score]
+  S2 --> G1[Guardrails
+source quality + diversity]
+  G1 --> T[Top-K shortlist]
+  T --> O[Verdict Aggregation Input]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -41,10 +46,15 @@ flowchart TD
 
 #### Mermaid Block
 ```mermaid
-flowchart LR
-    A[Signal A] --> B[Interpretation A]
-    C[Signal B] --> D[Interpretation B]
-    E[Signal C] --> F[Interpretation C]
+flowchart TB
+  subgraph MatrixAxes[Stance-Aware Matrix]
+    X1[Rows: support/refute/neutral logits]
+    X2[Cols: predicate alignment, object match, source trust]
+  end
+  MatrixAxes --> C1[Compute stance-aware rank delta]
+  C1 --> C2[Boost contradiction when verified]
+  C2 --> C3[Penalize neutral-only dominance]
+  C3 --> O[Re-ranked list]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -68,12 +78,16 @@ flowchart LR
 
 #### Mermaid Block
 ```mermaid
-graph TD
-    A[Input Signals] --> B[Intermediate Signal A]
-    A --> C[Intermediate Signal B]
-    B --> D[Decision Node]
-    C --> D
-    D --> E[F21: Trust score decomposition]
+flowchart LR
+  T[Trust Score] --> C[Source Credibility]
+  T --> Q[Evidence Quality]
+  T --> A[Alignment Strength]
+  T --> D[Diversity Contribution]
+  C --> W[Weighted Trust Composite]
+  Q --> W
+  A --> W
+  D --> W
+  W --> O[Admissibility/Priority Signal]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -98,9 +112,13 @@ graph TD
 #### Mermaid Block
 ```mermaid
 flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F22: Evidence admissibility gate]
+  E[Evidence Item] --> G1{source trusted?}
+  G1 -- no --> R1[Reject: low credibility]
+  G1 -- yes --> G2{claim alignment >= threshold?}
+  G2 -- no --> R2[Reject: weak alignment]
+  G2 -- yes --> G3{stance confidence >= threshold?}
+  G3 -- no --> R3[Keep as neutral]
+  G3 -- yes --> A[Admit directional evidence]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -124,10 +142,16 @@ flowchart TD
 
 #### Mermaid Block
 ```mermaid
-graph LR
-    A[Cause 1] --> C[Outcome]
-    B[Cause 2] --> C
-    C --> D[Observed Metric Shift]
+flowchart LR
+  C[Claim Frame] --> SA[Subject Alignment]
+  C --> PA[Predicate Alignment]
+  C --> OA[Object Alignment]
+  C --> QA[Qualifier Alignment]
+  SA --> F[Alignment Fusion]
+  PA --> F
+  OA --> F
+  QA --> F
+  F --> S[Final alignment_score]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -152,9 +176,14 @@ graph LR
 #### Mermaid Block
 ```mermaid
 flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F24: Contradiction admission path]
+  E[Candidate Evidence] --> C1[Compute contradiction_score]
+  C1 --> C2[Evaluate refute_eligibility_score]
+  C2 --> G{eligibility >= threshold?}
+  G -- no --> N[Not admitted to refute
+block_reason logged]
+  G -- yes --> V{anti-hallucination checks pass?}
+  V -- no --> N2[Rejected by guardrail]
+  V -- yes --> R[Admit to contradiction mass]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -178,11 +207,15 @@ flowchart TD
 
 #### Mermaid Block
 ```mermaid
-xychart-beta
-    title "F25: Evidence diversity vs agreement map"
-    x-axis [Low, Mid, High, Extreme]
-    y-axis "Value" 0 --> 100
-    line [22, 48, 63, 79]
+flowchart LR
+  A[Low diversity + high agreement] --> Z1[Overfit risk]
+  B[High diversity + high agreement] --> Z2[Strong robust signal]
+  C[High diversity + low agreement] --> Z3[Uncertain / mixed]
+  D[Low diversity + low agreement] --> Z4[Insufficient evidence]
+  Z1 --> P[Confidence penalty]
+  Z3 --> P
+  Z4 --> P
+  Z2 --> Q[Confidence uplift]
 ```
 
 #### Figure Spec (Camera-Ready)
@@ -207,9 +240,13 @@ xychart-beta
 #### Mermaid Block
 ```mermaid
 flowchart TD
-    A[Claim/Input] --> B[Processing Stage]
-    B --> C[Evidence + Signals]
-    C --> D[F26: Neutral-only evidence detection flow]
+  I[Ranked Evidence Set] --> C1[Count support/refute labels]
+  C1 --> D{support=0 and refute=0?}
+  D -- no --> N[Proceed directional policy]
+  D -- yes --> C2[Check neutral evidence quality]
+  C2 --> C3[Assign internal UNVERIFIABLE]
+  C3 --> C4[Apply binary projection rule]
+  C4 --> O[Output with abstain_reason]
 ```
 
 #### Figure Spec (Camera-Ready)
